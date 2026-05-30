@@ -233,7 +233,7 @@ void sreset_stop_adapter(_adapter *padapter)
 
 	/* TODO: OS and HCI independent */
 #if defined(PLATFORM_LINUX) && defined(CONFIG_USB_HCI)
-	tasklet_kill(&pxmitpriv->xmit_tasklet);
+	flush_workqueue(pxmitpriv->xmit_wq);
 #endif
 
 	if (check_fwstate(pmlmepriv, WIFI_UNDER_SURVEY))
@@ -261,7 +261,7 @@ void sreset_start_adapter(_adapter *padapter)
 
 	/* TODO: OS and HCI independent */
 #if defined(PLATFORM_LINUX) && defined(CONFIG_USB_HCI)
-	tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
+	queue_work(pxmitpriv->xmit_wq, &pxmitpriv->xmit_work);
 #endif
 
 	if (is_primary_adapter(padapter))

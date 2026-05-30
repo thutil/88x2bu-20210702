@@ -847,11 +847,11 @@ static s32 rtl8822bu_xmitframe_complete(PADAPTER padapter, struct xmit_priv *pxm
 }
 #endif
 
-static void rtl8822bu_xmit_tasklet(void *priv)
+static void rtl8822bu_xmit_work(struct work_struct *work)
 {
 	int ret = _FALSE;
-	_adapter *padapter = (_adapter *)priv;
-	struct xmit_priv *pxmitpriv = &padapter->xmitpriv;
+	struct xmit_priv *pxmitpriv = container_of(work, struct xmit_priv, xmit_work);
+	_adapter *padapter = pxmitpriv->adapter;
 
 	while (1) {
 		if (RTW_CANNOT_TX(padapter)) {
@@ -877,13 +877,11 @@ s32	rtl8822bu_init_xmit_priv(PADAPTER padapter)
 	HAL_DATA_TYPE *pHalData = GET_HAL_DATA(padapter);
 
 #ifdef PLATFORM_LINUX
-	tasklet_init(&pxmitpriv->xmit_tasklet,
-#if (LINUX_VERSION_CODE < KERNEL_VERSION(5, 17, 0) && !defined(RHEL92))
-		     (void(*)(unsigned long))rtl8822bu_xmit_tasklet,
-#else
-		     (void *)rtl8822bu_xmit_tasklet,
-#endif
-		     (unsigned long)padapter);
+	/* Use workqueue instead of deprecated tasklet (inspired by in-kernel rtw88 driver) */
+	pxmitpriv->xmit_wq = create_singlethread_workqueue("rtl88x2bu_xmit");
+	if (!pxmitpriv->xmit_wq)
+		return _FAIL;
+	INIT_WORK(&pxmitpriv->xmit_work, rtl8822bu_xmit_work);
 #endif
 #ifdef CONFIG_TX_EARLY_MODE
 	pHalData->bEarlyModeEnable = padapter->registrypriv.early_mode;
@@ -894,6 +892,15 @@ s32	rtl8822bu_init_xmit_priv(PADAPTER padapter)
 
 void	rtl8822bu_free_xmit_priv(PADAPTER padapter)
 {
+#ifdef PLATFORM_LINUX
+	struct xmit_priv *pxmitpriv = &padapter->xmitpriv;
+
+	if (pxmitpriv->xmit_wq) {
+		flush_workqueue(pxmitpriv->xmit_wq);
+		destroy_workqueue(pxmitpriv->xmit_wq);
+		pxmitpriv->xmit_wq = NULL;
+	}
+#endif
 }
 
 static s32 xmitframe_direct(PADAPTER padapter, struct xmit_frame *pxmitframe)
@@ -992,7 +999,7 @@ s32 rtl8822bu_hal_mgmt_xmitframe_enqueue(PADAPTER padapter, struct xmit_frame *p
 		pxmitpriv->tx_drop++;
 	} else {
 #ifdef PLATFORM_LINUX
-		tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
+		queue_work(pxmitpriv->xmit_wq, &pxmitpriv->xmit_work);
 #endif
 	}
 	return err;
@@ -1010,7 +1017,7 @@ s32 rtl8822bu_hal_xmitframe_enqueue(PADAPTER padapter, struct xmit_frame *pxmitf
 		pxmitpriv->tx_drop++;
 	} else {
 #ifdef PLATFORM_LINUX
-		tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
+		queue_work(pxmitpriv->xmit_wq, &pxmitpriv->xmit_work);
 #endif
 	}
 

@@ -7427,6 +7427,8 @@ unsigned int OnAction_tbtx_token(_adapter *padapter, union recv_frame *precv_fra
 			ATOMIC_SET(&padapter->tbtx_remove_tx_pause, _FALSE);
 #if defined(CONFIG_SDIO_HCI) && !defined(CONFIG_SDIO_TX_TASKLET)
 			_rtw_up_sema(&pxmitpriv->SdioXmitSema);
+#elif defined(CONFIG_USB_HCI)
+			queue_work(pxmitpriv->xmit_wq, &pxmitpriv->xmit_work);
 #else
 			tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
 #endif

@@ -6338,7 +6338,7 @@ void rtw_amsdu_vo_timeout_handler(void *FunctionContext)
 
 	adapter->xmitpriv.amsdu_vo_timeout = RTW_AMSDU_TIMER_TIMEOUT;
 
-	tasklet_hi_schedule(&adapter->xmitpriv.xmit_tasklet);
+	queue_work(adapter->xmitpriv.xmit_wq, &adapter->xmitpriv.xmit_work);
 }
 
 void rtw_amsdu_vi_timeout_handler(void *FunctionContext)
@@ -6347,7 +6347,7 @@ void rtw_amsdu_vi_timeout_handler(void *FunctionContext)
 
 	adapter->xmitpriv.amsdu_vi_timeout = RTW_AMSDU_TIMER_TIMEOUT;
 
-	tasklet_hi_schedule(&adapter->xmitpriv.xmit_tasklet);
+	queue_work(adapter->xmitpriv.xmit_wq, &adapter->xmitpriv.xmit_work);
 }
 
 void rtw_amsdu_be_timeout_handler(void *FunctionContext)
@@ -6359,7 +6359,7 @@ void rtw_amsdu_be_timeout_handler(void *FunctionContext)
 	if (printk_ratelimit())
 		RTW_INFO("%s Timeout!\n",__FUNCTION__);
 
-	tasklet_hi_schedule(&adapter->xmitpriv.xmit_tasklet);
+	queue_work(adapter->xmitpriv.xmit_wq, &adapter->xmitpriv.xmit_work);
 }
 
 void rtw_amsdu_bk_timeout_handler(void *FunctionContext)
@@ -6368,7 +6368,7 @@ void rtw_amsdu_bk_timeout_handler(void *FunctionContext)
 
 	adapter->xmitpriv.amsdu_bk_timeout = RTW_AMSDU_TIMER_TIMEOUT;
 
-	tasklet_hi_schedule(&adapter->xmitpriv.xmit_tasklet);
+	queue_work(adapter->xmitpriv.xmit_wq, &adapter->xmitpriv.xmit_work);
 }
 
 u8 rtw_amsdu_get_timer_status(_adapter *padapter, u8 priority)

@@ -774,7 +774,9 @@ struct	xmit_priv	{
 	_sema	tx_retevt;/* all tx return event; */
 	u8		txirp_cnt;
 
-	_tasklet xmit_tasklet;
+	/* workqueue-based TX (replaces deprecated tasklet, derived from in-kernel rtw88 driver) */
+	struct work_struct xmit_work;
+	struct workqueue_struct *xmit_wq;
 
 	/* per AC pending irp */
 	int beq_cnt;

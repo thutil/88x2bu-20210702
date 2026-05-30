@@ -558,7 +558,7 @@ check_completion:
 
 	/* if(rtw_txframes_pending(padapter))	 */
 	{
-		tasklet_hi_schedule(&pxmitpriv->xmit_tasklet);
+		queue_work(pxmitpriv->xmit_wq, &pxmitpriv->xmit_work);
 	}
 
 
