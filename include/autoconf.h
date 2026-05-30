@@ -210,13 +210,13 @@
 	#define CONFIG_USB_RX_AGGREGATION	1
 #endif
 
-/* #define CONFIG_REDUCE_USB_TX_INT	1 */ /* Trade-off: Improve performance, but may cause TX URBs blocked by USB Host/Bus driver on few platforms. */
+#define CONFIG_REDUCE_USB_TX_INT	1 /* Trade-off: Improve performance, but may cause TX URBs blocked by USB Host/Bus driver on few platforms. */
 /* #define CONFIG_EASY_REPLACEMENT	1 */
 
 /*
  * CONFIG_USE_USB_BUFFER_ALLOC_XX uses Linux USB Buffer alloc API and is for Linux platform only now!
  */
-/* #define CONFIG_USE_USB_BUFFER_ALLOC_TX 1 */	/* Trade-off: For TX path, improve stability on some platforms, but may cause performance degrade on other platforms. */
+#define CONFIG_USE_USB_BUFFER_ALLOC_TX 1	/* Trade-off: For TX path, improve stability on some platforms, but may cause performance degrade on other platforms. */
 /* #define CONFIG_USE_USB_BUFFER_ALLOC_RX 1	*/ /* For RX path */
 #ifdef CONFIG_USE_USB_BUFFER_ALLOC_RX
 
