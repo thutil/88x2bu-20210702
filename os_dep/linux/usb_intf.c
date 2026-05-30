@@ -651,6 +651,12 @@ static struct dvobj_priv *usb_dvobj_init(struct usb_interface *usb_intf, const s
 		pdvobjpriv->usb_speed = RTW_USB_SPEED_3;
 		break;
 #endif
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0))
+	case USB_SPEED_SUPER_PLUS:
+		RTW_INFO("USB_SPEED_SUPER_PLUS\n");
+		pdvobjpriv->usb_speed = RTW_USB_SPEED_3;
+		break;
+#endif
 	default:
 		RTW_INFO("USB_SPEED_UNKNOWN(%x)\n", pusbd->speed);
 		pdvobjpriv->usb_speed = RTW_USB_SPEED_UNKNOWN;
